@@ -1,0 +1,15 @@
+{
+  "summary": {
+    "total_posts": 732,
+    "model_performance": {
+      "best_model": "SVM",
+      "test_accuracy": 0.7482993197278912,
+      "all_models": {
+        "Logistic Regression": 0.7346938775510204,
+        "Naive Bayes": 0.7346938775510204,
+        "Random Forest": 0.7074829931972789,
+        "SVM": 0.7482993197278912
+      }
+    },
+    "sentiment_distribution": {
+      "neutral": 

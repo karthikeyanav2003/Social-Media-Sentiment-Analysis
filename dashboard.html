@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🤖 Advanced ML Sentiment Analysis Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            padding: 20px; 
+        }}
+        .container {{ 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 20px; 
+            overflow: hidden; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+        }}
+        .header {{ 
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); 
+            color: white; 
+            padding: 30px; 
+            text-align: center; 
+        }}
+        .header h1 {{ font-size: 2.5em; margin: 0 0 10px 0; }}
+        .header p {{ font-size: 1.1em; opacity: 0.9; }}
+
+        .ml-stats {{ 
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); 
+            color: white; 
+            padding: 25px; 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            text-align: center;
+        }}
+        .ml-stat-item {{
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }}
+        .accuracy {{ font-size: 1.8em; color: #2ecc71; font-weight: bold; margin-bottom: 5px; }}
+        .stat-label {{ font-size: 0.9em; opacity: 0.8; }}
+
+        .main-content {{
+            padding: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }}
+
+        .stats-grid {{ 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
+            margin-bottom: 25px;
+        }}
+        .stat-card {{ 
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); 
+            padding: 20px; 
+            border-radius: 12px; 
+            text-align: center; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            transition: transform 0.3s ease;
+        }}
+        .stat-card:hover {{ transform: translateY(-3px); }}
+        .stat-number {{ font-size: 1.8em; font-weight: bold; margin-bottom: 8px; }}
+        .positive {{ color: #27ae60; }} 
+        .negative {{ color: #e74c3c; }} 
+        .neutral {{ color: #95a5a6; }} 
+        .total {{ color: #3498db; }}
+
+        .chart-container {{ 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            margin-bottom: 20px;
+            height: 300px;
+        }}
+        .chart-title {{ 
+            font-size: 1.3em; 
+            text-align: center; 
+            margin-bottom: 15px; 
+            color: #2c3e50; 
+            font-weight: 600;
+        }}
+
+        .side-panel {{
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }}
+
+        .model-comparison, .platform-stats, .word-cloud {{ 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        }}
+        .model-item, .platform-item, .word-item {{ 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 8px 0; 
+            border-bottom: 1px solid #f0f0f0; 
+            font-size: 0.9em;
+        }}
+        .model-item:last-child, .platform-item:last-child, .word-item:last-child {{ border-bottom: none; }}
+        .model-score {{ 
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.8em;
+        }}
+
+        .insights {{ 
+            background: white; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            margin: 20px 25px;
+        }}
+        .insights-header {{ 
+            background: linear-gradient(135deg, #34495e, #2c3e50); 
+            color: white; 
+            padding: 15px 20px; 
+            font-size: 1.2em; 
+            font-weight: 600;
+        }}
+        .insights-content {{ padding: 20px; }}
+        .insight {{ 
+            padding: 10px 0; 
+            border-bottom: 1px solid #eee; 
+            font-size: 0.95em;
+            line-height: 1.4;
+        }}
+        .insight:last-child {{ border-bottom: none; }}
+
+        .controls {{ 
+            text-align: center; 
+            padding: 30px; 
+            background: linear-gradient(135deg, #ecf0f1, #bdc3c7); 
+        }}
+        .btn {{ 
+            background: linear-gradient(135deg, #3498db, #2980b9); 
+            color: white; 
+            border: none; 
+            padding: 12px 25px; 
+            border-radius: 25px; 
+            margin: 0 8px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            display: inline-block; 
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }}
+        .btn:hover {{ 
+            background: linear-gradient(135deg, #2980b9, #3498db); 
+            transform: translateY(-2px);
+        }}
+
+        @media (max-width: 768px) {{
+            .main-content {{ grid-template-columns: 1fr; }}
+            .stats-grid {{ grid-template-columns: repeat(2, 1fr); }}
+            .ml-stats {{ grid-template-columns: repeat(2, 1fr); }}
+            .header h1 {{ font-size: 2em; }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Advanced ML Sentiment Analysis</h1>
+            <p>🚀 Comprehensive Social Media Intelligence Dashboard</p>
+            <p><small>📊 {total_posts:,} posts analyzed with {test_accuracy:.1%} accuracy</small></p>
+        </div>
+        
+        <div class="ml-stats">
+            <div class="ml-stat-item">
+                <div class="accuracy">{test_accuracy:.1%}</div>
+                <div class="stat-label">Model Accuracy</div>
+            </div>
+            <div class="ml-stat-item">
+                <div class="accuracy">{best_model}</div>
+                <div class="stat-label">Best Algorithm</div>
+            </div>
+            <div class="ml-stat-item">
+                <div class="accuracy">{feature_count:,}</div>
+                <div class="stat-label">ML Features</div>
+            </div>
+            <div class="ml-stat-item">
+                <div class="accuracy">{avg_confidence:.1%}</div>
+                <div class="stat-label">Avg Confidence</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number total">{total_posts:,}</div>
+                        <div>📊 Total Posts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number positive">{positive_count:,}</div>
+                        <div>😊 Positive</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number negative">{negative_count:,}</div>
+                        <div>😢 Negative</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number neutral">{neutral_count:,}</div>
+                        <div>😐 Neutral</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">📈 Sentiment Distribution Analysis</h3>
+                    <canvas id="sentimentChart" style="max-height: 250px;"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">📊 Platform Performance Breakdown</h3>
+                    <canvas id="platformChart" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="model-comparison">
+                    <h3 class="chart-title">🏆 ML Model Performance</h3>
+                    {model_performance_html}
+                </div>
+                
+                <div class="platform-stats">
+                    <h3 class="chart-title">📱 Top Platforms</h3>
+                    {platform_stats_html}
+                </div>
+                
+                <div class="word-cloud">
+                    <h3 class="chart-title">🔤 Most Common Words</h3>
+                    {word_cloud_html}
+                </div>
+            </div>
+        </div>
+        
+        <div class="insights">
+            <div class="insights-header">💡 AI-Powered Insights & Analysis</div>
+            <div class="insights-content">
+                {insights_html}
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="location.reload()" class="btn refresh-btn">
+                🔄 Refresh Dashboard
+            </button>
+            <button onclick="window.print()" class="btn">🖨️ Print Report</button>
+            <button onclick="toggleFullscreen()" class="btn">🖥️ Fullscreen</button>
+        </div>
+    </div>
+
+    <script>
+        // Sentiment Distribution Chart
+        const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+        new Chart(sentimentCtx, {{
+            type: 'doughnut',
+            data: {{
+                labels: ['😊 Positive', '😢 Negative', '😐 Neutral'],
+                datasets: [{{
+                    data: [{positive_count}, {negative_count}, {neutral_count}],
+                    backgroundColor: ['#27ae60', '#e74c3c', '#95a5a6'],
+                    borderWidth: 3,
+                    borderColor: '#fff',
+                    hoverBorderWidth: 5
+                }}]
+            }},
+            options: {{ 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{ 
+                    legend: {{ 
+                        position: 'bottom',
+                        labels: {{
+                            padding: 20,
+                            font: {{ size: 14, weight: 'bold' }},
+                            usePointStyle: true
+                        }}
+                    }},
+                    tooltip: {{
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#fff',
+                        borderWidth: 1,
+                        callbacks: {{
+                            label: function(context) {{
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let percentage = ((context.parsed * 100) / total).toFixed(1);
+                                return context.label + ': ' + context.parsed.toLocaleString() + ' (' + percentage + '%)';
+                            }}
+                        }}
+                    }}
+                }},
+                animation: {{
+                    animateRotate: true,
+                    duration: 2000
+                }}
+            }}
+        }});
+        
+        // Platform Chart
+        const platformLabels = {platform_labels};
+        const platformData = {platform_data};
+        
+        const platformCtx = document.getElementById('platformChart').getContext('2d');
+        new Chart(platformCtx, {{
+            type: 'bar',
+            data: {{
+                labels: platformLabels,
+                datasets: [{{
+                    label: 'Posts',
+                    data: platformData,
+                    backgroundColor: [
+                        'rgba(52, 152, 219, 0.8)',
+                        'rgba(46, 204, 113, 0.8)',
+                        'rgba(155, 89, 182, 0.8)',
+                        'rgba(241, 196, 15, 0.8)',
+                        'rgba(231, 76, 60, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(52, 152, 219, 1)',
+                        'rgba(46, 204, 113, 1)',
+                        'rgba(155, 89, 182, 1)',
+                        'rgba(241, 196, 15, 1)',
+                        'rgba(231, 76, 60, 1)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 5
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    legend: {{ display: false }},
+                    tooltip: {{
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff'
+                    }}
+                }},
+                scales: {{
+                    y: {{
+                        beginAtZero: true,
+                        grid: {{ color: 'rgba(0,0,0,0.1)' }},
+                        ticks: {{ font: {{ weight: 'bold' }} }}
+                    }},
+                    x: {{
+                        grid: {{ display: false }},
+                        ticks: {{ font: {{ weight: 'bold' }} }}
+                    }}
+                }},
+                animation: {{
+                    duration: 2000,
+                    easing: 'easeOutBounce'
+                }}
+            }}
+        }});
+        
+        // Utility functions
+        function toggleFullscreen() {{
+            if (!document.fullscreenElement) {{
+                document.documentElement.requestFullscreen();
+            }} else {{
+                document.exitFullscreen();
+            }}
+        }}
+    </script>
+</body>
+</html>
