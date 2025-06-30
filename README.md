@@ -128,13 +128,7 @@ The script will:
 - **💡 AI Insights**: Automated analysis and recommendations
 - **📈 Interactive Charts**: Pie charts and bar graphs
 
-## 📊 Machine Learning Pipeline
+### Dashboard
+![image](https://github.com/user-attachments/assets/0ac73f35-6c96-4461-b3a9-8178af75ca7f)
 
-### 1. Data Preprocessing
-```python
-# Text cleaning pipeline
-- Remove URLs, mentions, hashtags
-- Convert to lowercase
-- Remove special characters
-- Handle missing values
-- Standardize sentiment labels
+
