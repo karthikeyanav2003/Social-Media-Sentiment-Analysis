@@ -102,16 +102,6 @@ Python 3.7+ required
 pip install pandas flask scikit-learn matplotlib seaborn numpy
 \`\`\`
 
-### Project Structure
-\`\`\`
-📂 sentiment-analysis/
-├── 📄 sentiment_analysis.py    # Main Python script
-├── 📄 dashboard.html          # HTML template
-├── 📄 sentimentdataset.csv    # Your dataset
-├── 📄 README.md              # This file
-└── 📄 requirements.txt       # Dependencies
-\`\`\`
-
 ## 🎮 Usage
 
 ### 1. Prepare Your Dataset
