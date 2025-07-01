@@ -1,4 +1,4 @@
-# 🚀 Advanced Social Media Sentiment Analysis with Machine Learning
+# 🚀 Social Media Sentiment Analysis with Machine Learning
 
 A comprehensive sentiment analysis system that processes social media data using advanced machine learning techniques and provides an interactive web dashboard for visualization and insights.
 
